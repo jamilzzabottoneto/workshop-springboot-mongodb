@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.jamilneto.workshopmongo.domain.Post;
 import com.jamilneto.workshopmongo.domain.User;
 import com.jamilneto.workshopmongo.dto.UserDTO;
 import com.jamilneto.workshopmongo.service.UserService;
@@ -20,49 +21,55 @@ import com.jamilneto.workshopmongo.service.UserService;
 @RestController
 @RequestMapping(value = "/users")
 public class UserResource {
-	
+
 	@Autowired
 	private UserService service;
 
-	//@GetMapping
-	@RequestMapping(method=RequestMethod.GET)
-	public ResponseEntity<List<UserDTO>> findAll(){		
+	// @GetMapping
+	@RequestMapping(method = RequestMethod.GET)
+	public ResponseEntity<List<UserDTO>> findAll() {
 		List<User> list = service.findAll();
 		List<UserDTO> listDTO = list.stream().map(x -> new UserDTO(x)).collect(Collectors.toList());
 		return ResponseEntity.ok().body(listDTO);
 	}
-	
-	@RequestMapping(value="/{id}", method=RequestMethod.GET)
-	public ResponseEntity<UserDTO> findById(@PathVariable String id){
-		
-		User obj = service.findById(id);		
+
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	public ResponseEntity<UserDTO> findById(@PathVariable String id) {
+
+		User obj = service.findById(id);
 		return ResponseEntity.ok().body(new UserDTO(obj));
 	}
-	
-	//@PostMapping
-	@RequestMapping(method=RequestMethod.POST)
-	public ResponseEntity<Void> insert(@RequestBody UserDTO objDTO){
-		
-		User obj = service.fromDTO(objDTO);	
+
+	// @PostMapping
+	@RequestMapping(method = RequestMethod.POST)
+	public ResponseEntity<Void> insert(@RequestBody UserDTO objDTO) {
+
+		User obj = service.fromDTO(objDTO);
 		obj = service.insert(obj);
-		
+
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
 		return ResponseEntity.created(uri).build();
 	}
-	
-	//@PostMapping
-		@RequestMapping(value="/{id}", method=RequestMethod.PUT)
-		public ResponseEntity<Void> update(@RequestBody UserDTO objDTO, @PathVariable String id){			
-			User obj = service.fromDTO(objDTO);	
-			obj.setId(id);
-			obj = service.update(obj);
-			return ResponseEntity.noContent().build();
-		}
-	
-	@RequestMapping(value="/{id}", method=RequestMethod.DELETE)
-	public ResponseEntity<Void> delete(@PathVariable String id){
-		service.delete(id);		
+
+	// @PostMapping
+	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+	public ResponseEntity<Void> update(@RequestBody UserDTO objDTO, @PathVariable String id) {
+		User obj = service.fromDTO(objDTO);
+		obj.setId(id);
+		obj = service.update(obj);
 		return ResponseEntity.noContent().build();
 	}
-	
+
+	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+	public ResponseEntity<Void> delete(@PathVariable String id) {
+		service.delete(id);
+		return ResponseEntity.noContent().build();
+	}
+
+	@RequestMapping(value = "/{id}/post", method = RequestMethod.GET)
+	public ResponseEntity<List<Post>> findPosts(@PathVariable String id) {
+		User obj = service.findById(id);
+		return ResponseEntity.ok().body(obj.getPost());
+	}
+
 }
